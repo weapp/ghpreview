@@ -1,0 +1,25 @@
+doctype html
+html(lang="en")
+  head
+    title= title
+    link(rel='stylesheet', href='/css/style.css')
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css')
+  body
+    include ./_right_menu.jade
+    h1= title
+      .small #{repo}/#{branch}
+    .finder: ul
+      li.dir: a(href=('/github.com/#{repo}/tree/#{branch}'))
+        span.icon: i.fa.fa-code-fork
+        span= branch
+
+      each file in files
+        li.file
+          a(href=('/github.com/#{repo}/blob/#{branch}/#{file.filename}'))
+            span.icon: i.fa.fa-file-text-o
+            span= file.filename
+            span.right
+              if file.additions
+                span.green +#{file.additions}
+              if file.deletions
+                span.red #{' '}-#{file.deletions}

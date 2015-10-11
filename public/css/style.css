@@ -1,0 +1,91 @@
+body {
+  font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 20px 50px 150px;
+  font-size: 13px;
+}
+
+h1{
+  font-family: sans-serif; margin: 1ex; border-bottom: 1px solid #DDD;padding-bottom: 0.5ex;
+  margin-bottom: 2ex
+}
+
+li a{ display:block; color: #000; text-decoration:none;}
+
+.finder li{list-style-type:none;}
+.finder li a:hover{ background:#F0FAFD;}
+.finder li a{ padding: 1ex; }
+.finder ._dir{border: 1px solid #EE8}
+.finder ._file{border: 1px solid #D8E1E6}
+.finder ul{border: 1px solid #D8E1E6;border-bottom:0; max-width: 600px; padding:0; margin-left: 3em}
+.finder li{border-bottom: 1px solid #D8E1E6}
+.finder li a span.icon{margin: 0 .5em; color: #666;width: 1em;display:inline-block;text-align: center}
+.right{float:right}
+
+h1 .small{font-size: 75%; color:#888}
+
+.green{ color: #3A5919;}
+.red{ color: #8D1919;}
+.gray{ color: #666;}
+
+.menu {
+  margin: 1ex 2em 0 0;
+}
+
+.menu ul {
+  text-align: left;
+  display: inline;
+  margin: 0;
+  padding: 15px 4px 17px 4px;
+  background:#FFF;
+  list-style: none;
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+}
+.menu ul li {
+  font: bold 12px/18px sans-serif;
+  display: inline-block;
+  position: relative;
+  padding: 15px 20px;
+  background: #fff;
+  cursor: pointer;
+  -webkit-transition: all 0.2s;
+  -moz-transition: all 0.2s;
+  -ms-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.menu ul li:hover {
+  //- background: #555;
+  //- color: #fff;
+}
+.menu ul li ul {
+  border: 1px solid #D8E1E6;
+  padding: 0;
+  position: absolute;
+  top: 48px;
+  right: -4px;
+  min-width: 20em;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transiton: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
+  -ms-transition: opacity 0.2s;
+  -o-transition: opacity 0.2s;
+  -transition: opacity 0.2s;
+}
+.menu ul li ul li {
+  padding: 1ex 20px;
+  display: block;
+  white-space: nowrap;
+}
+.menu ul li ul li:hover { background: #D8E1E6; }
+.menu ul li:hover ul {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}

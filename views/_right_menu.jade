@@ -1,0 +1,4 @@
+.right.menu: ul: li
+  = branch
+  ul: each branch in branches
+    li: a(href=('/github.com/#{repo}/tree/#{branch}'))= branch

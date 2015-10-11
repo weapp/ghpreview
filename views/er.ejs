@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .mono{
+        font-family:Menlo,Monaco,Consolas,"Courier New",monospace;
+      }
+      textarea {
+          resize: none;
+      }
+
+      @media (min-width: 992px){
+        .form-control{
+          background-color:rgba(255,255,255,0.7);
+          font-size: 12px;
+        }
+        .leftbar{
+          padding-left:0;
+          margin-left:0;
+          background-color:rgba(255,255,255,0.7);
+          position:fixed;
+          z-index:200;
+          padding-left:15px;
+          margin-left:-15px;
+          height: 100%;
+          overflow: scroll;
+          border-right:2px solid rgba(200,200,200,0.2);
+        }
+      }
+      #saved {float:right; opacity: 0.2}
+      #saved .green {color: #070}
+      #saved .red {color: #700}
+      .graph-table {height:100%;width:100%;text-align:center}
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <% /* error_message if defined? error_message */ %>
+      <div class="col-md-4 leftbar">
+        <h1>
+          <span>E<span style="color:#DC143C">rb</span><span style="color:#483D8B">wiz</span></span>&nbsp;
+          <span id="saved"></span>
+        </h1>
+          <input type=hidden id=key name=key value="<% /*params[:key]*/ %>">
+          <div class="form-group">
+            <textarea id="content" name="content" rows="1" class="form-control mono"><%- content %></textarea>
+            <div style="float:right;padding:1em 0">
+              <input type="button" onclick="download();" value="download" class="btn btn-primary"><br>
+            </div>
+            <div id="last-watched"></div>
+          </div>
+      </div>
+      <div class="col-md-4">
+      </div>
+      <div class="col-md-8">
+        <table class="graph-table">
+          <tr>
+            <td>
+              <div id="graph"></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <script type="text/javascript" src="/js/viz.js" ></script>
+      <script type="text/javascript" src="/js/ejs.js" ></script>
+      <script type="text/javascript" src="/js/erjs.js" ></script>
+      <script type="text/javascript" src="/js/er2dot.js" ></script>
+      <script type="text/javascript" src="/js/fetchival.js" ></script>
+      <script type="text/javascript" src="/js/store.min.js" ></script>
+      <script type="text/javascript" src="/js/dnd_textarea.js" ></script>
+      <script type="text/javascript" src="/js/autosize.js" ></script>
+
+      <script type="text/javascript" src="/js/app.js" ></script>
+
+      <script id="graph-template" type="x-tmpl-ejs"><%- template %></script>
+
+    </div>
+  </body>
+</html>
