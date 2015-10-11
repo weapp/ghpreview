@@ -1,0 +1,36 @@
+{ title: "My ER Diagram" }
+
+# Tables
+[User] { color: :blue }
+  *id
+  blog_id* <nullable>
+  name
+
+[Blog] { color: :orange }
+  *id
+  user_id*
+  title
+  logo <url>
+
+[Post]
+  *id
+  blog_id*
+  title
+  body
+
+# Relations
+[User] 1--? [Blog]
+[Blog] 1--* [Post]
+[Post] +--* [Tag]
+[Post] 1--* [Comment]
+[User] 1--* [Comment]
+[User] *--* [User] <friendship>
+
+# Extras
+[Post] == [Comment]
+
+{ node.fontsize: 10 }
+{ global.pad: 0.2 }
+{ global.resolution: 75 }
+{ global.ranksep: 0.8 }
+{ global.nodesep: 0.3 }

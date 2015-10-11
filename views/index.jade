@@ -5,28 +5,13 @@ html(lang="en")
     link(rel='stylesheet', href='/css/style.css')
     link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css')
   body
-    include ./_right_menu.jade
-    h1 #{repo}/#{branch}#{pah}
-    .finder: ul
-      if path !== '' && path !== '/'
-        li.dir: a(href=('/github.com/#{repo}/tree/#{branch}#{path}/..' ))
-          span.icon: i.fa.fa-folder
-          span ..
-      each file in files
-        if file.type === 'dir'
-          li.dir: a(href=('/github.com/#{repo}/tree/#{branch}/#{file.path}'))
-            span.icon: i.fa.fa-folder
-            span #{file.name}
+    .right.menu
+      if !token
+        ul
+          li
+            a(href='/login') Login
+    h1 GitHub Preview
+    form.search
+      input.input.url(type='url' name='url' size='100' placeholder='https://github.com/weapp/ghpreview/examples' value='https://github.com/weapp/ghpreview/examples')
+      input.input.submit(type='submit')
 
-      each file in files
-        if file.type === 'file' && !file.download_url
-          li.dir: a(href=('#'))
-            span.icon: i.fa.fa-chain-broken
-            span #{file.name}
-
-      each file in files
-        if file.type === 'file' && file.download_url
-          li.file: a(href=('/github.com/#{repo}/blob/#{branch}/#{file.path}'))
-            span.icon: i.fa.fa-file-text-o
-            span #{file.name}
-            span.right.gray= bytesToSize(file.size)

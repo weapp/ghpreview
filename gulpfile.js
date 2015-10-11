@@ -8,7 +8,7 @@ var gutil = require('gutil');
 var peg = require('gulp-peg');
 // var browserify = require('browserify');
 
-gulp.task("default", function () {
+gulp.task("build", function () {
   // var js = gulp.src("src/**/*.js")
   //   .pipe(sourcemaps.init())
   //   .pipe(babel())

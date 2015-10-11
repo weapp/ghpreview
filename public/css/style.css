@@ -89,3 +89,22 @@ h1 .small{font-size: 75%; color:#888}
   opacity: 1;
   visibility: visible;
 }
+
+.search .input {
+  padding: 1ex 1em;
+  background: #FFF;
+  color: #000;
+  border: 1px solid #AAA;
+  font-size: 2ex;
+}
+
+.search .url{
+  margin: 1ex 1em 1ex 2em;
+}
+
+.search .submit{
+}
+
+.search .submit:hover{
+  background:#D8E1E6;
+}

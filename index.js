@@ -1,3 +1,3 @@
 require('babel/register')
 require('coffee-script/register')
-require('./app')
+require('./server/app')

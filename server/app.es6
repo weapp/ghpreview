@@ -17,8 +17,8 @@ dotenv.load();
 var app = express()
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.set('view engine', 'jade')
-app.use(express.static(__dirname + '/public'))
-app.use(express.static(__dirname + '/build'))
+app.use(express.static(__dirname + '/../public'))
+app.use(express.static(__dirname + '/../build'))
 
 app.set('port', (process.env.PORT || 3000));
 
@@ -87,7 +87,12 @@ app.use(function (req, res, next) {
 })
 
 app.get('/', function (req, res) {
-  res.send('<a href="/login">login</a>')
+  res.locals.token = req.signedCookies._gh_token
+  if (req.query.url){
+    var url = req.query.url.match(/https?:\/(\/github\.com\/.*)/)[1]
+    res.redirect(url)
+  }
+  res.render('index', {})
 })
 
 var login = (req, res) => {
@@ -172,10 +177,12 @@ app.get('/github.com/*/blob/*', (req, res) => {
             renderAglio(content, res.send.bind(res))
           } else if (extname(params.path) === '.md') {
             renderAglio(content, res.send.bind(res))
+          } else if (extname(params.path) === '.apib') {
+            renderAglio(content, res.send.bind(res))
           } else if (extname(params.path) === '.er') {
             res.render('er.ejs', {
               content: content,
-              template: fs.readFileSync(__dirname + '/views/graph.ejs', 'utf8')
+              template: fs.readFileSync(__dirname + '/../views/graph.ejs', 'utf8')
             })
           } else {
             res.send('unknown format')
@@ -201,7 +208,7 @@ app.get('/github.com/*/pull/*', (req, res) => {
   try {
     getParamsFromPull(req)
       .then(([repo, branches, branch, files]) => {
-        res.render('pulls', { repo, files: files[0], ...branch, branches })
+        res.render('list', { repo, files: files[0], ...branch, branches })
       })
       .done()
   } catch (error) {
@@ -216,7 +223,7 @@ app.get(['/github.com/*/tree/*', '/github.com/*'], (req, res) => {
       .then(params =>
         // dirFor(params.token, params.repo, params.branch, params.path)
         contentsFor(params.token, params.repo, params.branch, stripTrailingSlash(params.path))
-        .then(([content, metadata]) => res.render('index', { ...params, files: content })))
+        .then(([content, metadata]) => res.render('list', { ...params, files: content })))
         .catch(error => {
           console.trace(error)
           if (req.signedCookies._gh_token) {
@@ -233,10 +240,10 @@ app.get(['/github.com/*/tree/*', '/github.com/*'], (req, res) => {
   }
 })
 
-app.get('/showCookie', (req, res) => {
-  var signedCookie = req.signedCookies._gh_token
-  res.send({signedCookie})
-})
+// app.get('/showCookie', (req, res) => {
+//   var signedCookie = req.signedCookies._gh_token
+//   res.send({signedCookie})
+// })
 
 app.get('/auth', function (req, res) {
   console.dir('query:', req.query)
@@ -258,7 +265,7 @@ app.get('/auth', function (req, res) {
       if (prevUrl) {
         res.redirect(prevUrl)
       } else {
-        res.redirect('/showCookie')
+        res.redirect('/')
       }
     })
   }
