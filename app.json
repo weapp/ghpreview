@@ -4,5 +4,22 @@
   "repository": "https://github.com/weapp/ghpreview",
   "logo": "http://node-js-sample.herokuapp.com/node.svg",
   "keywords": ["node", "express", "static"],
-  "image": "heroku/nodejs"
+  "image": "heroku/nodejs",
+  "env": {
+    "COOKIE_SECRET": {
+      "description": "A secret key for verifying the integrity of signed cookies.",
+      "generator": "secret"
+    },
+    "GITHUB_ID": {
+      "description": "Github application id from https://github.com/settings/applications/new",
+    },
+    "GITHUB_SECRET": {
+      "description": "Github application secret from https://github.com/settings/applications/new",
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs#v63"
+    }
+  ]
 }
