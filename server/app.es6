@@ -10,44 +10,44 @@ import express from 'express'
 import fs from 'fs'
 import dotenv from 'dotenv'
 
-dotenv.load();
+dotenv.load()
 
 // bluebird.promisifyAll(redis.RedisClient.prototype)
 
-var app = express()
+const app = express()
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.set('view engine', 'jade')
 app.use(express.static(__dirname + '/../public'))
 app.use(express.static(__dirname + '/../build'))
 
-app.set('port', (process.env.PORT || 3000));
+app.set('port', (process.env.PORT || 3000))
 
-var extractStateFromAuthUrl = authUrl => [authUrl, authUrl.match(/&state=([0-9a-z]{32})/i)[1]]
+const extractStateFromAuthUrl = authUrl => [authUrl, authUrl.match(/&state=([0-9a-z]{32})/i)[1]]
 
-var authUrl = () => extractStateFromAuthUrl(github.auth.config({
+const authUrl = () => extractStateFromAuthUrl(github.auth.config({
   id: process.env.GITHUB_ID,
   secret: process.env.GITHUB_SECRET
 }).login(['user', 'repo']))
 
-var extractConent = data => new Buffer(data.content, 'base64').toString()
+const extractConent = data => new Buffer(data.content, 'base64').toString()
 
-var contentsFor = (token, repo, branch, path) => {
+const contentsFor = (token, repo, branch, path) => {
   console.log('contentsFor', [token, repo, branch, path])
   return Q.ninvoke(github.client(token).repo(repo), 'contents', path, branch)
 }
 
-var inclueRegExp = /(<!-- include\((.*)\) -->)/g
+const inclueRegExp = /(<!-- include\((.*)\) -->)/g
 
-function stripTrailingSlash (str) {
+const stripTrailingSlash = str => {
   if (str.substr(-1) === '/') {
     return str.substr(0, str.length - 1)
   }
   return str
 }
 
-var expandPath = (path, filename) => stripTrailingSlash(resolve(resolve('/', path), filename))
+const expandPath = (path, filename) => stripTrailingSlash(resolve(resolve('/', path), filename))
 
-var replacer = (token, repo, branch, path) =>
+const replacer = (token, repo, branch, path) =>
   (match, all, filename, offset, string, done) =>
     blobFor(token, repo, branch, expandPath(dirname(path), filename))
       .then(content => done(null, content))
@@ -55,17 +55,17 @@ var replacer = (token, repo, branch, path) =>
       .done()
 
 // ghrepo.blob(ok.sha, function (err, ok) {})
-var blobFor = (token, repo, branch, path) => {
+const blobFor = (token, repo, branch, path) => {
   console.log([token, repo, branch, path, expandPath(branch, path)])
-  return Q.Promise((resolve, reject, notify) => {
+  return Q.Promise((promiseResolve, reject, _notify) => {
     console.log('blobFor', [token, repo, branch, path])
     contentsFor(token, repo, branch, stripTrailingSlash(path))
-      .then(([data, metadata]) => {
+      .then(([data, _metadata]) => {
         Q.nfcall(aReplace,
                  extractConent(data),
                  inclueRegExp,
                  replacer(token, repo, branch, path))
-          .then(resolve)
+          .then(promiseResolve)
           .catch(reject)
           .done()
       })
@@ -74,69 +74,69 @@ var blobFor = (token, repo, branch, path) => {
   }
 ) }
 
-function bytesToSize (bytes) {
-  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+const bytesToSize = bytes => {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   if (bytes === 0) { return '0 Byte' }
-  var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 0)
-  return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i]
+  const int = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 0)
+  return Math.round(bytes / Math.pow(1024, int), 2) + ' ' + sizes[int]
 }
 
-app.use(function (req, res, next) {
+app.use((_req, res, next) => {
   res.locals.bytesToSize = bytesToSize
   next()
 })
 
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
   res.locals.token = req.signedCookies._gh_token
-  if (req.query.url){
-    var url = req.query.url.match(/https?:\/(\/github\.com\/.*)/)[1]
+  if (req.query.url) {
+    const url = req.query.url.match(/https?:\/(\/github\.com\/.*)/)[1]
     res.redirect(url)
   }
   res.render('index', {})
 })
 
-var login = (req, res) => {
-  var [url, state] = authUrl()
+const login = (req, res) => {
+  const [url, state] = authUrl()
   res.cookie('_gh_state', '' + state, { signed: true })
   res.redirect(url)
 }
 
 app.get('/login', login)
 
-function getParamsFromPull (request) {
-  var repo = request.params[0]
-  var pull = request.params[1]
-  var token = request.signedCookies._gh_token
+const getParamsFromPull = request => {
+  const repo = request.params[0]
+  const pull = request.params[1]
+  const token = request.signedCookies._gh_token
 
-  var branches = Q.ninvoke(github.client(token).repo(repo), 'branches')
-    .then(([data, metadata]) => data.map(e => e.name))
+  const branches = Q.ninvoke(github.client(token).repo(repo), 'branches')
+    .then(([data, _metadata]) => data.map(it => it.name))
 
-  var branch = Q.ninvoke(github.client(token).pr(repo, pull), 'info')
-    .then(([data, metadata]) => ({title: data.title, branch: data.head.ref}))
+  const branch = Q.ninvoke(github.client(token).pr(repo, pull), 'info')
+    .then(([data, _metadata]) => ({title: data.title, branch: data.head.ref}))
 
-  var files = Q.ninvoke(github.client(token).pr(repo, pull), 'files')
+  const files = Q.ninvoke(github.client(token).pr(repo, pull), 'files')
 
   return Q.all([repo, branches, branch, files])
 }
 
-function getParams (request) {
+const getParams = request => {
   console.log('params:', request.params)
-  return Q.Promise((resolve, reject, notify) => {
-    var repo = request.params[0]
-    var branch_path = request.params[1]
-    var token = request.signedCookies._gh_token
+  return Q.Promise((promiseResolve, reject, _notify) => {
+    const repo = request.params[0]
+    const branchSlashPath = request.params[1]
+    const token = request.signedCookies._gh_token
 
     Q.ninvoke(github.client(token).repo(repo), 'branches')
-    .then(([data, metadata]) => {
-      var branches = data.map(e => e.name)
-      var branch = 'master'
-      var path = '/'
-      if (branch_path) {
-        branch = branches.filter(e => (branch_path === e) || branch_path.startsWith(`${e}/`))[0]
-        path = branch_path.slice(branch.length)
+    .then(([data, _metadata]) => {
+      const branches = data.map(it => it.name)
+      let branch = 'master'
+      let path = '/'
+      if (branchSlashPath) {
+        branch = branches.filter(it => (branchSlashPath === it) || branchSlashPath.startsWith(`${it}/`))[0]
+        path = branchSlashPath.slice(branch.length)
       }
       if (branch) {
-        resolve({token, repo, branches, branch, path})
+        promiseResolve({token, repo, branches, branch, path})
       } else {
         reject(new Error('branch not found'))
       }
@@ -146,14 +146,14 @@ function getParams (request) {
   })
 }
 
-var formatLocation = location => `index: ${location.index} length: ${location.length}`
+const formatLocation = location => `index: ${location.index} length: ${location.length}`
 
-var toHtml = obj => {
+const toHtml = obj => {
   return `code ${obj.code}:\n  ${obj.message}\n    ${obj.location.map(formatLocation).join('\n    ')}`
 }
 
-var renderAglio = (content, done) => {
-  var options = { themeVariables: 'default' }
+const renderAglio = (content, done) => {
+  const options = { themeVariables: 'default' }
   aglio.render(content, options, (err, html, warnings) => {
     if (err) {
       done(err)
@@ -223,7 +223,7 @@ app.get(['/github.com/*/tree/*', '/github.com/*'], (req, res) => {
       .then(params =>
         // dirFor(params.token, params.repo, params.branch, params.path)
         contentsFor(params.token, params.repo, params.branch, stripTrailingSlash(params.path))
-        .then(([content, metadata]) => res.render('list', { ...params, files: content })))
+        .then(([content, _metadata]) => res.render('list', { ...params, files: content })))
         .catch(error => {
           console.trace(error)
           if (req.signedCookies._gh_token) {
@@ -241,14 +241,14 @@ app.get(['/github.com/*/tree/*', '/github.com/*'], (req, res) => {
 })
 
 // app.get('/showCookie', (req, res) => {
-//   var signedCookie = req.signedCookies._gh_token
+//   let signedCookie = req.signedCookies._gh_token
 //   res.send({signedCookie})
 // })
 
-app.get('/auth', function (req, res) {
+app.get('/auth', (req, res) => {
   console.dir('query:', req.query)
-  var params = req.query
-  var state = req.signedCookies._gh_state
+  const params = req.query
+  const state = req.signedCookies._gh_state
 
   // Check against CSRF attacks
   if (!state || state !== params.state) {
@@ -261,7 +261,7 @@ app.get('/auth', function (req, res) {
       if (err) { return console.error(err) }
       console.log(token)
       res.cookie('_gh_token', '' + token, { signed: true })
-      var prevUrl = req.signedCookies._gh_prev_url
+      const prevUrl = req.signedCookies._gh_prev_url
       if (prevUrl) {
         res.redirect(prevUrl)
       } else {
