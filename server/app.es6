@@ -208,7 +208,7 @@ app.get('/github.com/*/pull/*', (req, res) => {
   try {
     getParamsFromPull(req)
       .then(([repo, branches, branch, files]) => {
-        res.render('list', { repo, files: files[0], ...branch, branches })
+        res.render('pulls', { repo, files: files[0], ...branch, branches })
       })
       .done()
   } catch (error) {
