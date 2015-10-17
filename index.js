@@ -1,3 +1,5 @@
-require('babel/register')
-require('coffee-script/register')
+require('babel/register')({
+  optional: ['es7.functionBind']
+})
+// require('coffee-script/register')
 require('./server/app')
