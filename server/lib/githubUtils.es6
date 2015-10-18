@@ -1,21 +1,22 @@
-import {ninvoke, Promise as promise, all as qall} from 'q'
+import {ninvoke, all as qall} from 'q'
 import {stripTrailingSlash, renderError} from './utils'
 
 export function getParamsFromPullMid(req, res, next) {
   req.gh.repo = req.params[0]
   req.gh.pull = req.params[1]
 
-  const branches = ninvoke(req.gh.client.repo(req.gh.repo), 'branches')
-    .then(([data, _metadata]) => data.map(it => it.name))
+  const branches_ = ninvoke(req.gh.client.repo(req.gh.repo), 'branches')
+  .then(([data, _metadata]) => data.map(it => it.name))
 
-  const branch = ninvoke(req.gh.client.pr(req.gh.repo, req.gh.pull), 'info')
-    .then(([data, _metadata]) => ({title: data.title, branch: data.head.ref}))
+  const branch_ = ninvoke(req.gh.client.pr(req.gh.repo, req.gh.pull), 'info')
+  .then(([data, _metadata]) => ({title: data.title, branch: data.head.ref}))
 
-  const files = ninvoke(req.gh.client.pr(req.gh.repo, req.gh.pull), 'files')
+  const files_ = ninvoke(req.gh.client.pr(req.gh.repo, req.gh.pull), 'files')
+  .then(([data, _metadata]) => data)
 
-  qall([branches, branch, files])
+  qall([branches_, branch_, files_])
   .then(([branches, branch, files]) => {
-    Object.assign(req.gh, {branches, files: files[0], ...branch})
+    Object.assign(req.gh, {branches, files, ...branch})
     next()
   })
   .catch(renderError(res))

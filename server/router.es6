@@ -3,7 +3,7 @@ import {getParamsMid, getParamsFromPullMid} from './lib/githubUtils'
 import {index} from './routes/index'
 import {blob, pull, tree} from './routes/github'
 
-export default function(){
+export default function() {
   this.use(loadToken)
 
   this.get('/', index)

@@ -5,7 +5,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import {bytesToSize} from './lib/utils'
 import router from './router'
-var emoji = require('emoji-parser');
+import emoji from 'emoji-parser'
 
 // keep emoji-images in sync with the official repository
 emoji.init().update()
