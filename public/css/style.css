@@ -9,23 +9,33 @@ h1{
   margin-bottom: 2ex
 }
 
+h1 .small{font-size: 75%; color:#888}
+
 li a{ display:block; color: #000; text-decoration:none;}
 
-.finder li{list-style-type:none;}
-.finder li a:hover{ background:#F0FAFD;}
+.finder ul{
+  border: 1px solid #D8E1E6;
+  border-bottom:0;
+  max-width: 600px;
+  padding:0;
+  margin-left: 3em;
+  border-radius: 3px;
+  -webkit-box-shadow: 3px 3px 3px -3px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 3px 3px 3px -3px rgba(0, 0, 0, 0.15);
+  box-shadow: 3px 3px 3px -3px rgba(0, 0, 0, 0.15);
+}
+.finder li{list-style-type:none;border-bottom: 1px solid #D8E1E6}
 .finder li a{ padding: 1ex; }
-.finder ._dir{border: 1px solid #EE8}
-.finder ._file{border: 1px solid #D8E1E6}
-.finder ul{border: 1px solid #D8E1E6;border-bottom:0; max-width: 600px; padding:0; margin-left: 3em}
-.finder li{border-bottom: 1px solid #D8E1E6}
+.finder li a:hover{ background:#F0FAFD;}
 .finder li a span.icon{margin: 0 .5em; color: #666;width: 1em;display:inline-block;text-align: center}
+
 .right{float:right}
 
-h1 .small{font-size: 75%; color:#888}
 
 .green{ color: #3A5919;}
 .red{ color: #8D1919;}
 .gray{ color: #666;}
+.light-gray{ color: #AAA;font-weight: 100;}
 
 .menu {
   margin: 1ex 2em 0 0;
@@ -107,4 +117,13 @@ h1 .small{font-size: 75%; color:#888}
 
 .search .submit:hover{
   background:#D8E1E6;
+}
+
+.emoji{
+  width: 2ex;
+  height: 2ex
+}
+
+.description{
+  padding: .3ex 0 .3ex 2em;
 }

@@ -6,7 +6,7 @@ html(lang="en")
     link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css')
   body
     .right.menu
-      if !token
+      if !gh.token
         ul
           li
             a(href='/login') Login
@@ -15,3 +15,39 @@ html(lang="en")
       input.input.url(type='url' name='url' size='100' placeholder='https://github.com/weapp/ghpreview/tree/master/examples' value='https://github.com/weapp/ghpreview/tree/master/examples')
       input.input.submit(type='submit')
 
+    .finder: ul
+      each repo in repos
+        li: a(href=('/github.com/#{repo.full_name}/tree/#{repo.default_branch}'))
+          if repo.private
+            span.icon: i.fa.fa-lock
+          else
+            span.icon: i.fa.fa-folder-o
+          span.gray #{repo.owner.login}/
+          strong #{repo.name}
+          span.right
+            if repo.fork
+              span.icon: i.fa.fa-code-fork
+          div.light-gray.description
+            if repo.description
+              != emoji.parse(repo.description, '/emoji')
+        //- li
+        //-   div
+        //-     span.icon: i.fa.fa-angle-right
+        //-     span id: #{repo.id}
+        //-   div
+        //-     span.icon: i.fa.fa-angle-right
+        //-     span created_at: #{repo.created_at}
+        //-   div
+        //-     span.icon: i.fa.fa-angle-right
+        //-     span updated_at: #{repo.updated_at}
+        //-   div
+        //-     span.icon: i.fa.fa-angle-right
+        //-     span pushed_at: #{repo.pushed_at}
+        //-   div
+        //-     span.icon: i.fa.fa-angle-right
+        //-     span homepage: #{repo.homepage}
+        //-   div
+        //-     span.icon: i.fa.fa-angle-right
+        //-     span language: #{repo.language}
+
+        - // li: pre= JSON.stringify(repo, null, 2)

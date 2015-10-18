@@ -1,11 +1,11 @@
 import github from 'octonode'
 
 export function loadToken(req, res, next) {
-  req.githubToken = req.signedCookies._gh_token
-  req.githubClient = req.githubToken && github.client(req.githubToken)
-  req.gh = { token: req.githubToken, client: req.githubClient }
+  req.gh = {}
+  req.gh.token = req.signedCookies._gh_token
+  req.gh.client = req.gh.token && github.client(req.gh.token)
 
-  res.locals.token = req.githubToken
+  res.locals.token = req.gh.token
   res.locals.gh = req.gh
   next()
 }
@@ -35,11 +35,8 @@ export function auth(req, res) {
       console.log(token)
       res.cookie('_gh_token', '' + token, { signed: true })
       const prevUrl = req.signedCookies._gh_prev_url
-      if (prevUrl) {
-        res.redirect(prevUrl)
-      } else {
-        res.redirect('/')
-      }
+      if (prevUrl) { return res.redirect(prevUrl) }
+      res.redirect('/')
     })
   }
 }
@@ -51,10 +48,7 @@ export function login(req, res) {
 }
 
 export function requireLogin(req, res, next) {
-  if (req.githubToken) {
-    next()
-  } else {
-    res.cookie('_gh_prev_url', req.originalUrl, { signed: true })
-    login(req, res)
-  }
+  if (req.gh.token) { return next() }
+  res.cookie('_gh_prev_url', req.originalUrl, { signed: true })
+  login(req, res)
 }

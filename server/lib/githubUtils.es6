@@ -23,9 +23,10 @@ export function getParamsFromPullMid(req, res, next) {
 }
 
 export function extractBranchAndPath(branchAndPath, branches) {
+  if (!branchAndPath) { return ['master', '/'] }
   const branch = branches.filter(it => (branchAndPath === it) || branchAndPath.startsWith(`${it}/`))[0]
   const path = branch && branchAndPath.slice(branch.length)
-  return branchAndPath ? [branch, path] : ['master', '/']
+  return [branch, path]
 }
 
 export function getParamsMid(req, res, next) {
