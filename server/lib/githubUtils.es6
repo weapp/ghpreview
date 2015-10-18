@@ -1,19 +1,25 @@
 import {ninvoke, Promise as promise, all as qall} from 'q'
-import {stripTrailingSlash} from './utils'
+import {stripTrailingSlash, renderError} from './utils'
 
-export function getParamsFromPull(req) {
-  const repo = req.params[0]
-  const pull = req.params[1]
+export function getParamsFromPullMid(req, res, next) {
+  req.gh.repo = req.params[0]
+  req.gh.pull = req.params[1]
 
-  const branches = ninvoke(req.githubClient.repo(repo), 'branches')
+  const branches = ninvoke(req.gh.client.repo(req.gh.repo), 'branches')
     .then(([data, _metadata]) => data.map(it => it.name))
 
-  const branch = ninvoke(req.githubClient.pr(repo, pull), 'info')
+  const branch = ninvoke(req.gh.client.pr(req.gh.repo, req.gh.pull), 'info')
     .then(([data, _metadata]) => ({title: data.title, branch: data.head.ref}))
 
-  const files = ninvoke(req.githubClient.pr(repo, pull), 'files')
+  const files = ninvoke(req.gh.client.pr(req.gh.repo, req.gh.pull), 'files')
 
-  return qall([repo, branches, branch, files])
+  qall([branches, branch, files])
+  .then(([branches, branch, files]) => {
+    Object.assign(req.gh, {branches, files: files[0], ...branch})
+    next()
+  })
+  .catch(renderError(res))
+  .done()
 }
 
 export function extractBranchAndPath(branchAndPath, branches) {
@@ -22,22 +28,21 @@ export function extractBranchAndPath(branchAndPath, branches) {
   return branchAndPath ? [branch, path] : ['master', '/']
 }
 
-export function getParams(req) {
+export function getParamsMid(req, res, next) {
   console.log('params:', req.params)
-  return promise((resolve, reject, _notify) => {
-    const repo = stripTrailingSlash(req.params[0])
-    const branchAndPath = req.params[1]
-    ninvoke(req.githubClient.repo(repo), 'branches')
-    .then(([data, _metadata]) => {
-      const branches = data.map(it => it.name)
-      const [branch, path] = extractBranchAndPath(branchAndPath, branches)
-      if (branch) {
-        resolve({repo, branches, branch, path})
-      } else {
-        reject(new Error('branch not found'))
-      }
-    })
-    .catch(reject)
-    .done()
+  req.gh.repo = stripTrailingSlash(req.params[0])
+  const branchAndPath = req.params[1]
+  ninvoke(req.gh.client.repo(req.gh.repo), 'branches')
+  .then(([data, _metadata]) => {
+    req.gh.branches = data.map(it => it.name)
+    const [branch, path] = extractBranchAndPath(branchAndPath, req.gh.branches)
+    if (!branch) {
+      return res.status(404).send('branch not found')
+    }
+    req.gh.branch = branch
+    req.gh.path = path
+    next()
   })
+  .catch(renderError(res))
+  .done()
 }

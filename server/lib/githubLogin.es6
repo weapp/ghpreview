@@ -3,7 +3,10 @@ import github from 'octonode'
 export function loadToken(req, res, next) {
   req.githubToken = req.signedCookies._gh_token
   req.githubClient = req.githubToken && github.client(req.githubToken)
+  req.gh = { token: req.githubToken, client: req.githubClient }
+
   res.locals.token = req.githubToken
+  res.locals.gh = req.gh
   next()
 }
 
