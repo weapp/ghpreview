@@ -1,4 +1,6 @@
-import {ninvoke} from 'q'
+import {ninvoke, fcall} from 'q'
+import cache from 'memory-cache'
+
 
 export function bytesToSize(bytes) {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
@@ -36,7 +38,16 @@ function cacheKey(obj, ...extras) {
   return Object.keys(props).map(key => props[key]).concat(extras).join("::")
 }
 
+const SECONDS = 1000
+const MINUTES = 60 * SECONDS
+
 export function cinvoke(obj, action, ...args) {
-  console.log(cacheKey(obj, action, ...args))
-  return ninvoke(obj, action, ...args).then(([data, ]) => data)
+  const key = cacheKey(obj, action, ...args)
+  const cached = cache.get(key)
+  if (cached) {
+    console.log('HIT  -', key)
+    return fcall(() => cached)
+  }
+  console.log('MISS -', key)
+  return ninvoke(obj, action, ...args).then(([data, ]) => cache.put(key, data, 5 * MINUTES))
 }

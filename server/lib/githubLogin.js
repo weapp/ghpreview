@@ -19,7 +19,6 @@ const authUrl = () => extractStateFromAuthUrl(github.auth.config({
 }).login(['user', 'repo']))
 
 export function auth(req, res) {
-  console.dir('query:', req.query)
   const params = req.query
   const state = req.signedCookies._gh_state
 

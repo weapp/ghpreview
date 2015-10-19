@@ -31,7 +31,6 @@ export function extractBranchAndPath(branchAndPath, branches) {
 }
 
 export function getParamsMid(req, res, next) {
-  console.log('params:', req.params)
   req.gh.repo = stripTrailingSlash(req.params[0])
   const branchAndPath = req.params[1]
   cinvoke(req.gh.client.repo(req.gh.repo), 'branches')

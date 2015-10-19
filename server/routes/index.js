@@ -12,13 +12,11 @@ export function index(req, res) {
 
   // client.me().info(function(err, me, headers) {  })
 
-  if (!client) { res.render('index') }
-
-  const getRepos = user => cinvoke(user, 'repos')
+  if (!client) { return res.render('index') }
 
   cinvoke(client.me(), 'orgs')
   .then(orgs => orgs.map(org => client.org(org.login)).concat(client.me()))
-  .then(users => qall(users.map(getRepos)))
+  .then(users => qall(users.map(user => cinvoke(user, 'repos'))))
   .then(repos => [].concat.apply([], repos))
   .then(repos => repos.sort(cmpKey('pushed_at')))
   .then(repos => res.render('index', {repos}))
