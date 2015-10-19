@@ -1,3 +1,5 @@
+import {ninvoke} from 'q'
+
 export function bytesToSize(bytes) {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   if (bytes === 0) { return '0 Byte' }
@@ -27,4 +29,14 @@ export function extractGithubUrl(url) {
   if (!url) return void 0
   const match = url.match(/https?:\/(\/github\.com\/.*)/)
   if (match) return match[1]
+}
+
+function cacheKey(obj, ...extras) {
+  const props = {__:obj.constructor.name, ...obj, client: obj.client.token}
+  return Object.keys(props).map(key => props[key]).concat(extras).join("::")
+}
+
+export function cinvoke(obj, action, ...args) {
+  console.log(cacheKey(obj, action, ...args))
+  return ninvoke(obj, action, ...args).then(([data, ]) => data)
 }

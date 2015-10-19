@@ -1,6 +1,6 @@
 import aReplace from 'async-replace'
-import {ninvoke, nfcall, Promise as promise} from 'q'
-import {stripTrailingSlash} from './utils'
+import {nfcall, Promise as promise} from 'q'
+import {stripTrailingSlash, cinvoke} from './utils'
 import {resolve, dirname} from 'path'
 
 const extractConent = data => new Buffer(data.content, 'base64').toString()
@@ -17,16 +17,15 @@ const replacer = (fetcher, client, repo, branch, path) =>
       .done()
 
 export function contentsFor(client, repo, branch, path) {
-  console.log('contentsFor', [repo, branch, path])
-  return ninvoke(client.repo(stripTrailingSlash(repo)), 'contents', stripTrailingSlash(path), branch)
+  // console.log('contentsFor', [repo, branch, path])
+  return cinvoke(client.repo(stripTrailingSlash(repo)), 'contents', stripTrailingSlash(path), branch)
 }
 
 // ghrepo.blob(ok.sha, function (err, ok) {})
 export function blobFor(client, repo, branch, path) {
   return promise((resolve_, reject, _notify) => {
-    console.log('blobFor', {client, repo, branch, path})
     contentsFor(client, repo, branch, stripTrailingSlash(path))
-      .then(([data, _metadata]) => {
+      .then(data => {
         nfcall(aReplace,
                  extractConent(data),
                  inclueRegExp,

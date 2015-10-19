@@ -34,7 +34,7 @@ export function pull(req, res) {
 
 export function tree(req, res) {
   contentsFor(req.gh.client, req.gh.repo, req.gh.branch, req.gh.path)
-  .then(([content, _metadata]) => res.render('list', { ...req.gh, files: content }))
+  .then(content => res.render('list', { ...req.gh, files: content }))
   .catch(renderError(res))
   .done()
 }
