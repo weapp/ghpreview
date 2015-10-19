@@ -1,5 +1,6 @@
-import {ninvoke, fcall} from 'q'
+import {ninvoke, fcall, all as qall} from 'q'
 import cache from 'memory-cache'
+import {range} from 'lodash'
 
 
 export function bytesToSize(bytes) {
@@ -41,6 +42,8 @@ function cacheKey(obj, ...extras) {
 const SECONDS = 1000
 const MINUTES = 60 * SECONDS
 
+const parsePages = link => parseInt(link.match(/=(\d*)>; rel="last"/)[1], 10)
+
 export function cinvoke(obj, action, ...args) {
   const key = cacheKey(obj, action, ...args)
   const cached = cache.get(key)
@@ -49,5 +52,18 @@ export function cinvoke(obj, action, ...args) {
     return fcall(() => cached)
   }
   console.log('MISS -', key)
-  return ninvoke(obj, action, ...args).then(([data, ]) => cache.put(key, data, 5 * MINUTES))
+  return ninvoke(obj, action, ...args).then(([data, headers]) => {
+
+    if (headers.link) {
+      const pages = range(2, parsePages(headers.link) + 1)
+      const ninvoke_page = page =>
+        ninvoke(obj, action, page, ...args)
+        .then(([data, ]) => data)
+
+      return qall(pages.map(ninvoke_page))
+      .then(results => [].concat.apply([], results.concat(data) ))
+      .then(all => cache.put(key, all, 5 * MINUTES))
+    }
+    return cache.put(key, data, 5 * MINUTES)
+  })
 }
