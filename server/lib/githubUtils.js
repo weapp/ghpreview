@@ -1,26 +1,33 @@
 import {all as qall} from 'q'
 import {stripTrailingSlash, renderError, cinvoke} from './utils'
 
-export function getParamsFromPullMid(req, res, next) {
-  const client = req.gh.client
-  const repo = req.gh.repo = req.params[0]
-  const pull = req.gh.pull = req.params[1]
+export async function getParamsFromPullMid(req, res, next) {
+  try {
+    const client = req.gh.client
+    const repo = req.gh.repo = req.params[0]
+    const pull = req.gh.pull = req.params[1]
 
-  const branches_ = cinvoke(client.repo(repo), 'branches')
-  .then(data => data.map(it => it.name))
+    const branchesPromise = async () => {
+      const branches = await cinvoke(client.repo(repo), 'branches')
+      return branches.map(({name}) => name)
+    }()
 
-  const branch_ = cinvoke(client.pr(repo, pull), 'info')
-  .then(data => ({title: data.title, branch: data.head.ref}))
+    const branchPromise = async () => {
+      const {title, head} = await cinvoke(client.pr(repo, pull), 'info')
+      return {title, branch: head.ref}
+    }()
 
-  const files_ = cinvoke(client.pr(repo, pull), 'files')
+    const filesPromise = cinvoke(client.pr(repo, pull), 'files')
 
-  qall([branches_, branch_, files_])
-  .then(([branches, branch, files]) => {
+    const branches = await branchesPromise
+    const branch = await branchPromise
+    const files = await filesPromise
+
     Object.assign(req.gh, {branches, files, ...branch})
     next()
-  })
-  .catch(renderError(res))
-  .done()
+  } catch(error) {
+    renderError(res, error)
+  }
 }
 
 export function extractBranchAndPath(branchAndPath, branches) {
@@ -30,20 +37,18 @@ export function extractBranchAndPath(branchAndPath, branches) {
   return [branch, path]
 }
 
-export function getParamsMid(req, res, next) {
-  req.gh.repo = stripTrailingSlash(req.params[0])
-  const branchAndPath = req.params[1]
-  cinvoke(req.gh.client.repo(req.gh.repo), 'branches')
-  .then(data => {
-    req.gh.branches = data.map(it => it.name)
+export async function getParamsMid(req, res, next) {
+  try {
+    req.gh.repo = stripTrailingSlash(req.params[0])
+    const branchAndPath = req.params[1]
+    const data = await cinvoke(req.gh.client.repo(req.gh.repo), 'branches')
+    req.gh.branches = data.map(({name}) => name)
     const [branch, path] = extractBranchAndPath(branchAndPath, req.gh.branches)
-    if (!branch) {
-      return res.status(404).send('branch not found')
-    }
+    if (!branch) return res.status(404).send('branch not found')
     req.gh.branch = branch
     req.gh.path = path
     next()
-  })
-  .catch(renderError(res))
-  .done()
+  } catch(error) {
+    renderError(res, error)
+  }
 }

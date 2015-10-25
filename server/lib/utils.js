@@ -44,26 +44,23 @@ const MINUTES = 60 * SECONDS
 
 const parsePages = link => parseInt(link.match(/=(\d*)>; rel="last"/)[1], 10)
 
-export function cinvoke(obj, action, ...args) {
+export async function cinvoke(obj, action, ...args) {
   const key = cacheKey(obj, action, ...args)
   const cached = cache.get(key)
   if (cached) {
-    console.log('HIT  -', key)
-    return fcall(() => cached)
+    console.log(`HIT  - ${key}`)
+    return cached
   }
-  console.log('MISS -', key)
-  return ninvoke(obj, action, ...args).then(([data, headers]) => {
+  console.log(`MISS - ${key}`)
+  const [data, headers] = await ninvoke(obj, action, ...args)
 
-    if (headers.link) {
-      const pages = range(2, parsePages(headers.link) + 1)
-      const ninvoke_page = page =>
-        ninvoke(obj, action, page, ...args)
-        .then(([data, ]) => data)
+  if (headers.link) {
+    const pages = range(2, parsePages(headers.link) + 1)
+    const ninvoke_page = async page => (await ninvoke(obj, action, page, ...args))[0]
 
-      return qall(pages.map(ninvoke_page))
-      .then(results => [].concat.apply([], results.concat(data) ))
-      .then(all => cache.put(key, all, 5 * MINUTES))
-    }
-    return cache.put(key, data, 5 * MINUTES)
-  })
+    const results = await qall(pages.map(ninvoke_page))
+    const all = [].concat.apply([], results.concat(data) )
+    return cache.put(key, all, 5 * MINUTES)
+  }
+  return cache.put(key, data, 5 * MINUTES)
 }
